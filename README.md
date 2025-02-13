@@ -1,7 +1,7 @@
 
 # Blur Closed / 关掉模糊效果
 
-A Magisk module to disable blur features / 一个用于禁用模糊特性的 Magisk 模块。
+A Magisk module to disable blur features / 一个用于禁用模糊特性的 Magisk 模块
 
 ## Support Root Implements / 支持的 Root 方案
 
