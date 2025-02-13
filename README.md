@@ -12,4 +12,5 @@ A Magisk module to disable blur features / 一个用于禁用模糊特性的 Mag
 ## Help and Support / 帮助与支持
 
 You can click [here](https://github.com/Astoritin/Blur_Closed/issues) to give feedback if facing problems / 如果遇到问题，请点击 [此处](https://github.com/Astoritin/Blur_Closed/issues) 提交反馈
+
 [Pull request](https://github.com/Astoritin/Blur_Closed/pulls) is always welcome to let this module become better / 欢迎 [pull request](https://github.com/Astoritin/Blur_Closed/pulls)，让该模块变得更好
