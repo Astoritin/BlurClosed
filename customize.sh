@@ -1,3 +1,4 @@
+#!/system/bin/sh
 SKIPUNZIP=false
 MODNAME=$(grep_prop name "${TMPDIR}/module.prop")
 
@@ -51,5 +52,5 @@ REPLACE="
 
 show_system_info
 enforce_install_from_magisk_app
-set_module_files_perm
+# set_module_files_perm
 ui_print "- Welcome to use ${MODNAME}!"
