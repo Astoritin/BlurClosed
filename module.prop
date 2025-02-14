@@ -1,6 +1,6 @@
-id=BlurClosed
+id=blurclosed
 name=Blur Closed
-version=v1.0
-versionCode=1
+version=v1.2
+versionCode=3
 author=Astoritin Ambrosius
 description=Disable window blur effect to improve the performance and (maybe) save the battery life😋
