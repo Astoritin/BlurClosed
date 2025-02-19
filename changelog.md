@@ -2,8 +2,8 @@
 A Magisk module to disable blur features / 一个用于禁用模糊特性的 Magisk 模块
 
 ## Changelog / 变更日志
-### 1.3
-- You can update this module
+### ~~1.3~~
+- <del>You can update this module
   in the Magisk / KernelSU / APatch app
   by clicking on the "Update" button if update available
   since this build
@@ -15,7 +15,7 @@ A Magisk module to disable blur features / 一个用于禁用模糊特性的 Mag
   it is meaningless so only support simple switch so far)
   新增 action.sh 以临时切换模糊状态
   (不会在所有的ROM上起作用，由于某些prop即使重置状态
-  也要重启后生效，这没有任何意义，所以仅支持简单的切换)
+  也要重启后生效，这没有任何意义，所以仅支持简单的切换)</del>
 
 ### 1.2
 - Fix a careless problem in the name between "service.sh" and "services.sh" lol
