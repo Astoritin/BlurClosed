@@ -2,7 +2,19 @@
 A Magisk module to disable blur features / 一个用于禁用模糊特性的 Magisk 模块
 
 ## Changelog / 变更日志
-### 1.0.1
+
+## 1.1.0
+
+- Support adding additional props for Xiaomi/Redmi devices
+- 支持针对小米设备额外添加属性值
+- Support adding additional props for Android 11 and higher devices
+- 支持针对 Android 11 及更高版本额外添加属性值
+- Sync the utilities partially to enhance the new features
+- 同步部分实用组件以增强新功能
+- Enhance integrity checks for module itself
+- 同步为该模块启用完整性验证
+
+## 1.0.1
 - Fix a careless problem in the name between "service.sh" and "services.sh" lol
   修复了由于粗心大意把“service.sh”看作“services.sh”的问题
 - Add the judgement of Android version to use proper command
@@ -18,6 +30,6 @@ A Magisk module to disable blur features / 一个用于禁用模糊特性的 Mag
 - Add new props: ro.surface_flinger.force_disable_blur=1
   增加新属性参数：ro.surface_flinger.force_disable_blur=1
 
-### 1.0
+## 1.0
 - Initial build / the first page
   第一页
