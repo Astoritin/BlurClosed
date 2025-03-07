@@ -1,7 +1,12 @@
 # Blur Closed / 关掉模糊效果
 A Magisk module to disable blur features / 一个用于禁用模糊特性的 Magisk 模块
 
-## Changelog / 变更日志
+## 1.2.0
+
+- Fix the issue of disabling blur not taking effect due to "local" keyword
+- 修复由于关键字"local"导致的禁用模糊效果不生效的问题
+- Add log version to debug
+- 增加用于调试的log版本
 
 ## 1.1.0
 
