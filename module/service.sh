@@ -1,7 +1,7 @@
 #!/system/bin/sh
 MODDIR=${0%/*}
 
-local API="$(getprop ro.build.version.sdk)"
+API="$(getprop ro.build.version.sdk)"
 
 if [[ "$API" -ge "29" ]]; then
     cmd window disable-blur 1
