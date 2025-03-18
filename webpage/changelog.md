@@ -10,6 +10,7 @@ A Magisk module to disable blur features / 一个用于禁用模糊特性的 Mag
 - Sync the changes of aautilities.sh / 同步 `aautilities.sh` 的变更
 - Remove Bash ONLY code and enhance the compatibility for POSIX shell / 移除 Bash 专属代码，增强了对 POSIX shell 的兼容性
 - Several minor changes / 若干细微改动
+- SHA256: `15e535f79fde200e3088ba0e09ce130fc1c409c51c63f3ab0b00c3df4d6b7978`
 
 ### 1.2.0
 
