@@ -1,14 +1,24 @@
-# Blur Closed / 关掉模糊效果
+## Blur Closed / 关掉模糊效果
 A Magisk module to disable blur features / 一个用于禁用模糊特性的 Magisk 模块
 
-## 1.2.0
+### Changelog / 变更日志
+
+### 1.2.2
+
+- Add some props to try to support OnePlus, Sansumg and Meizu Flyme 8 devices
+- 新增部分属性值以尝试支持一加、三星和魅族 Flyme 8 设备
+- Sync the changes of aautilities.sh / 同步 `aautilities.sh` 的变更
+- Remove Bash ONLY code and enhance the compatibility for POSIX shell / 移除 Bash 专属代码，增强了对 POSIX shell 的兼容性
+- Several minor changes / 若干细微改动
+
+### 1.2.0
 
 - Fix the issue of disabling blur not taking effect due to "local" keyword
 - 修复由于关键字"local"导致的禁用模糊效果不生效的问题
 - Add log version to debug
 - 增加用于调试的log版本
 
-## 1.1.0
+### 1.1.0
 
 - Support adding additional props for Xiaomi/Redmi devices
 - 支持针对小米设备额外添加属性值
@@ -19,7 +29,7 @@ A Magisk module to disable blur features / 一个用于禁用模糊特性的 Mag
 - Enhance integrity checks for module itself
 - 同步为该模块启用完整性验证
 
-## 1.0.1
+### 1.0.1
 - Fix a careless problem in the name between "service.sh" and "services.sh" lol
   修复了由于粗心大意把“service.sh”看作“services.sh”的问题
 - Add the judgement of Android version to use proper command
@@ -35,6 +45,6 @@ A Magisk module to disable blur features / 一个用于禁用模糊特性的 Mag
 - Add new props: ro.surface_flinger.force_disable_blur=1
   增加新属性参数：ro.surface_flinger.force_disable_blur=1
 
-## 1.0
+### 1.0
 - Initial build / the first page
   第一页
