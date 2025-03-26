@@ -6,10 +6,8 @@ MOD_NAME="$(grep_prop name "${TMPDIR}/module.prop")"
 MOD_VER="$(grep_prop version "${TMPDIR}/module.prop") ($(grep_prop versionCode "${TMPDIR}/module.prop"))"
 
 check_android_api(){
-  if [ "$API" -eq 30 ]; then
-  logowl "Detect Android 11"
-  elif [ "$API" -ge 31 ]; then
-  logowl "Detect Android 12+"
+  if [ "$API" -ge 30 ]; then
+  logowl "Detect Android 11+"
   else
   logowl "Detect Android version is lower than Android 11" "WARN"
   logowl "This module may not work properly in your ROM" "WARN"
@@ -43,6 +41,7 @@ logowl "Extract module files"
 extract "$ZIPFILE" 'module.prop' "$MODPATH"
 extract "$ZIPFILE" 'post-fs-data.sh' "$MODPATH"
 extract "$ZIPFILE" 'service.sh' "$MODPATH"
+extract "$ZIPFILE" 'uninstall.sh' "$MODPATH"
 rm -rf "$VERIFY_DIR"
 set_module_files_perm
 logowl "Welcome to use ${MODNAME}!"
