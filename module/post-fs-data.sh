@@ -39,17 +39,3 @@ if [ "$API" -ge "31" ]; then
     resetprop -n ro.surface_flinger.supports_background_blur 0
 fi
 
-resetprop -n disableBlurs 1
-resetprop -n disableBackgroundBlur 1
-resetprop -n enable_blurs_on_windows 0
-resetprop -n ro.launcher.blur.appLaunch 0
-resetprop -n ro.sf.blurs_are_costly 1
-resetprop -n ro.sf.blurs_are_expensive 1
-resetprop -n ro.surface_flinger.force_disable_blur 1
-resetprop -n persist.sys.sf.disable_blurs 1
-resetprop -n persist.sys.background_blur_supported 0
-resetprop -n persist.sys.background_blur_status_default 0
-resetprop -n persist.sys.background_blur_version 0
-resetprop -n persist.sys.add_blurnoise_supported 0
-resetprop -n persist.sys.enable_third_blur 0
-resetprop -n persist.sys.dynamic_blur_enabled 0
