@@ -72,7 +72,7 @@ install_env_check() {
 module_intro() {
     # module_intro: a function to show module basic info
 
-    MODULE_PROP="${MODDIR}/module.prop"
+    MODULE_PROP="$MODDIR/module.prop"
     MOD_NAME="$(sed -n 's/^name=\(.*\)/\1/p' "$MODULE_PROP")"
     MOD_AUTHOR="$(sed -n 's/^author=\(.*\)/\1/p' "$MODULE_PROP")"
     MOD_VER="$(sed -n 's/^version=\(.*\)/\1/p' "$MODULE_PROP") ($(sed -n 's/^versionCode=\(.*\)/\1/p' "$MODULE_PROP"))"
@@ -85,15 +85,39 @@ module_intro() {
     logowl "Version: $MOD_VER"
     logowl "Root solution: $ROOT_SOL"
     logowl "Current time stamp: $(date +"%Y-%m-%d %H:%M:%S")"
+    logowl "Current module dir: $MODDIR"
     print_line
+}
+
+init_logowl() {
+    # init_logowl: a function to initiate the log directory
+    # to make sure the log directory exist
+
+    LOG_DIR="$1"
+    if [ -z "$LOG_DIR" ]; then
+      logowl "LOG_DIR is not provided!" "ERROR"
+      return 1
+    fi
+
+  if [ ! -d "$LOG_DIR" ]; then
+      logowl "Log dir does NOT exist"
+      mkdir -p "$LOG_DIR" || {
+        logowl "Failed to create $LOG_DIR" "ERROR" >&2
+        return 2
+      }
+      logowl "Created $LOG_DIR"
+  else
+      logowl "$LOG_DIR already exists"
+  fi
+  logowl "Logowl initialized"
 }
 
 logowl() {
     # logowl: a function to format the log output
     # LOG_MSG: the log message you need to print
-    # LOG_LEVEL: the level of this log message
+    # LOG_LEVEL (optional): the level of this log message
     LOG_MSG="$1"
-    LOG_LEVEL="${2:-DEF}"
+    LOG_LEVEL="$2"
 
     if [ -z "$LOG_MSG" ]; then
         echo "! LOG_MSG is not provided yet!"
@@ -105,23 +129,34 @@ logowl() {
         "WARN") LOG_LEVEL="- Warn:" ;;
         "ERROR") LOG_LEVEL="! ERROR:" ;;
         "FATAL") LOG_LEVEL="× FATAL:" ;;
-        "NONE") LOG_LEVEL=" " ;;
+        "SPACE") LOG_LEVEL=" " ;;
+        "NONE") LOG_LEVEL="_" ;;
         *) LOG_LEVEL="-" ;;
     esac
 
-    if [ -z "$LOG_FILE" ]; then
-        if command -v ui_print >/dev/null 2>&1 && [ "$BOOTMODE" ]; then
-            ui_print "$LOG_LEVEL $LOG_MSG" 2>/dev/null
+    if [ -n "$LOG_FILE" ]; then
+        if [ "$LOG_LEVEL" = "! ERROR:" ] || [ "$LOG_LEVEL" = "× FATAL:" ]; then
+            echo "----------------------------------------------------" >> "$LOG_FILE"
+            echo "$LOG_LEVEL $LOG_MSG" >> "$LOG_FILE"
+            echo "----------------------------------------------------" >> "$LOG_FILE"
+        elif [ "$LOG_LEVEL" = "_" ]; then
+            echo "$LOG_MSG" >> "$LOG_FILE"
         else
-            echo "$LOG_LEVEL $LOG_MSG"
+            echo "$LOG_LEVEL $LOG_MSG" >> "$LOG_FILE"
         fi
     else
-        if [ "$LOG_LEVEL" = "! ERROR:" ] || [ "$LOG_LEVEL" = "× FATAL:" ]; then
-            print_line >> "$LOG_FILE"
-        fi
-        echo "$LOG_LEVEL $LOG_MSG" >> "$LOG_FILE"
-        if [ "$LOG_LEVEL" = "! ERROR:" ] || [ "$LOG_LEVEL" = "× FATAL:" ]; then
-            print_line >> "$LOG_FILE"
+        if command -v ui_print >/dev/null 2>&1 && [ "$BOOTMODE" ]; then
+            if [ "$LOG_LEVEL" = "! ERROR:" ] || [ "$LOG_LEVEL" = "× FATAL:" ]; then
+                ui_print "----------------------------------------------------"
+                ui_print "$LOG_LEVEL $LOG_MSG"
+                ui_print "----------------------------------------------------"
+            elif [ "$LOG_LEVEL" = "_" ]; then
+                ui_print "$LOG_MSG"
+            else
+                ui_print "$LOG_LEVEL $LOG_MSG"
+            fi
+        else
+            echo "$LOG_LEVEL $LOG_MSG"
         fi
     fi
 }
@@ -129,8 +164,151 @@ logowl() {
 print_line() {
     # print_line: a function to print separate line
     length=${1:-50}
+
     line=$(printf "%-${length}s" | tr ' ' '-')
-    echo "$line"
+    logowl "$line" "NONE"
+}
+
+init_variables() {
+    # init_variables: a function to initiate variables
+    # key: the key name
+    # config_file: the path and filename of the key it located
+    # value: the value of the key
+    key="$1"
+    config_file="$2"
+
+    if [ ! -f "$config_file" ]; then
+        logowl "Configuration file $config_file does NOT exist" "ERROR" >&2
+        return 1
+    fi
+
+    # Fetch the value from config file
+    value=$(sed -n "s/^$key=\(.*\)/\1/p" "$config_file" | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    if check_value_safety "$key" "$value"; then
+        echo "$value"
+        return 0
+    else
+        result=$?
+        return "$result"
+    fi
+
+}
+
+check_value_safety(){
+    # check_value_safety: a function to check the safety of value
+    key="$1"
+    value="$2"
+
+    # Check if the value is null
+    if [ -z "$value" ]; then
+        logowl "Detect empty value (code: 1)" "WARN"
+        return 1
+    fi
+
+    # Escape the value to safe one
+    value=$(printf "%s" "$value" | sed 's/'\''/'\\\\'\'''\''/g' | sed 's/[$;&|<>`"()]/\\&/g')
+
+    # Special handling for boolean values
+    if [ "$value" = "true" ] || [ "$value" = "false" ]; then
+        logowl "Verified $key=$value (boolean)" "TIPS"
+        return 0
+    fi
+
+    # If the value is start with "#", then take this line as comment line
+    first_char=$(printf '%s' "$value" | cut -c1)
+    if [ "$first_char" = "#" ]; then
+        logowl "Detect comment symbol (code: 2)" "WARN"
+        return 2
+    fi
+
+    # fetch the main content before symbol "#"
+    value=$(echo "$value" | cut -d'#' -f1 | xargs)
+
+    # regex: the regular expression to match the safe variable
+    regex='^[a-zA-Z0-9/_\. -]*$'
+    dangerous_chars='[`$();|<>]'
+
+    # Check for dangerous characters
+    if echo "$value" | grep -Eq "$dangerous_chars"; then
+        logowl "Key '$key' contains potential dangerous characters" "ERROR" >&2
+        return 3
+    fi
+    if ! echo "$value" | grep -Eq "$regex"; then
+        logowl "Key '$key' contains illegal characters" "WARN" >&2
+        return 4
+    fi
+
+    # If all checks pass
+    logowl "Verified $key=$value" "TIPS"
+    return 0
+}
+
+verify_variables() {
+    # verify_variables: a function to verify the availability of variables and export it
+    # config_var_name: the name of variable
+    # config_var_value: the value of variable
+    # validation_pattern: the regex pattern for checking the validity of the variable value
+    # default_value (optional): if the ordered value is unavailable, the value should be set as default
+    # script_var_name: the name of the variable in uppercase for exporting
+  
+    config_var_name="$1"
+    config_var_value="$2"
+    validation_pattern="$3"
+    default_value="${4:-}"
+    script_var_name=$(echo "$config_var_name" | tr '[:lower:]' '[:upper:]')
+
+    if [ -n "$config_var_value" ] && echo "$config_var_value" | grep -qE "$validation_pattern"; then
+        export "$script_var_name"="$config_var_value"
+        logowl "Set $script_var_name=$config_var_value" "TIPS"
+    else
+        logowl "Config var value is empty or does NOT match the pattern" "WARN"
+        logowl "Unavailable var: $script_var_name=$config_var_value"
+
+        # Check if a default value is provided
+        if [ -n "$default_value" ]; then
+            # Use eval to check if the variable is already set
+            if eval "[ -z \"\${$script_var_name+x}\" ]"; then
+                logowl "Using default value for $script_var_name: $default_value" "TIPS"
+                export "$script_var_name"="$default_value"
+            else
+                logowl "Variable $script_var_name already set, skipping default value" "WARN"
+            fi
+        else
+            logowl "No default value provided for $script_var_name, keeping its current state" "TIPS"
+            # Do nothing if no default value is provided
+        fi
+    fi
+}
+
+update_module_description() {
+    # update_module_description: a function to update the value of the key "description"
+    # DESCRIPTION: the description you want to update to
+    # MODULE_PROP: the path of module.prop you want to update the description
+
+    DESCRIPTION="$1"
+    MODULE_PROP="$2"
+    if [ -z "$DESCRIPTION" ] || [ -z "$MODULE_PROP" ]; then
+      logowl "DESCRIPTION or MODULE_PROP is not provided yet!" "ERROR"
+      return 3
+    fi
+    logowl "Update description: $DESCRIPTION"
+    sed -i "/^description=/c\description=$DESCRIPTION" "$MODULE_PROP"
+}
+
+debug_print_values() {
+    # debug_print_values: print the environment info and variables during this script running
+
+    print_line
+    logowl "All Environment Variables"
+    print_line
+    env | sed 's/^/- /'
+    print_line
+
+    logowl "All Shell Variables"
+    print_line
+    ( set -o posix; set ) | sed 's/^/- /'
+    print_line
 }
 
 show_system_info() {
@@ -147,6 +325,39 @@ show_system_info() {
     swap_free=$(echo "$mem_info" | awk '/Swap/ {print $4}')
     logowl "RAM: ${ram_total}MB  Used:${ram_used}MB  Free:${ram_free}MB"
     logowl "SWAP: ${swap_total}MB  Used:${swap_used}MB  Free:${swap_free}MB"
+}
+
+
+file_compare() {
+    # file_compare: a function to compare whether file a and file b is same or not
+    # file_a: the path of file a
+    # file_b: the path of file b
+
+    file_a="$1"
+    file_b="$2"
+    if [ -z "$file_a" ] || [ -z "$file_b" ]; then
+      logowl "Value a or value b does NOT exist!" "WARN"
+      return 2
+    fi
+    if [ ! -f "$file_a" ]; then
+      logowl "a is NOT a file!" "WARN"
+      return 3
+    fi
+    if [ ! -f "$file_b" ]; then
+      logowl "b is NOT a file!" "WARN"
+      return 3
+    fi
+    hash_file_a=$(sha256sum "$file_a" | awk '{print $1}')
+    hash_file_b=$(sha256sum "$file_b" | awk '{print $1}')
+    # logowl "File a: $hash_file_a"
+    # logowl "File b: $hash_file_b"
+    if [ "$hash_file_a" == "$hash_file_b" ]; then
+        # logowl "The hash of file a is equal to file b, they are the same files!"
+        return 0
+    else
+        # logowl "The hash of file a is NOT equal to file b, they are NOT the same files!"
+        return 1
+    fi
 }
 
 abort_verify() {
@@ -206,10 +417,33 @@ extract() {
     fi
 }
 
-set_module_files_perm() {
-    # set_module_files_perm: set module files's permission
-    # only use in installing module
+clean_old_logs() {
+    # clean_old_logs: a function to clean logs dir as detecting too many logs
+    # log_dir: the log directory you want to clean
+    # files_max: the max value of files you allow to keep in logs dir
+ 
+    log_dir="$1"
+    files_max="$2"
+    
+    if [ -z "$log_dir" ] || [ ! -d "$log_dir" ]; then
+        logowl "$log_dir is not found or is not a directory!" "ERROR"
+        return
+    fi
 
-    logowl "Setting permissions"
-    set_perm_recursive "$MODPATH" 0 0 0755 0644
+    if [ -z "$files_max" ]; then
+        files_max=30
+    fi
+
+    files_count=$(ls -1 "$log_dir" | wc -l)
+    if [ "$files_count" -gt "$files_max" ]; then
+        logowl "Detect too many log files" "WARN"
+        logowl "$files_count files, current max allowed: $files_max"
+        logowl "Clearing old logs"
+        ls -1t "$log_dir" | tail -n +$((files_max + 1)) | while read -r file; do
+            rm -f "$log_dir/$file"
+        done
+        logowl "Cleared!"
+    else
+        logowl "Detect $files_count files in $log_dir"
+    fi
 }
