@@ -12,7 +12,7 @@ A Magisk module to disable blur features / 一个用于禁用模糊特性的 Mag
 - optimize the judgement logic
 - 优化判断逻辑
 
-### 已知问题 / Known BUG
+### Known BUG / 已知问题
 
 - For HyperOS 2.0.201+: Resetprop works, but maybe HyperOS has given up reading properties to set blur effect
 - 对澎湃系统 2.0.201+: Resetprop 起作用，但是也许 HyperOS 已经放弃了通过读取属性值来设置模糊特效
