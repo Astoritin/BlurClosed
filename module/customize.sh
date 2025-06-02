@@ -1,47 +1,43 @@
 #!/system/bin/sh
 SKIPUNZIP=1
+
 VERIFY_DIR="$TMPDIR/.aa_verify"
 
 MOD_NAME="$(grep_prop name "${TMPDIR}/module.prop")"
 MOD_VER="$(grep_prop version "${TMPDIR}/module.prop") ($(grep_prop versionCode "${TMPDIR}/module.prop"))"
 
-check_android_api(){
-  if [ "$API" -ge 30 ]; then
-  logowl "Detect Android 11+"
-  else
-  logowl "Detect Android version is lower than Android 11" "WARN"
-  logowl "This module may not work properly in your ROM" "WARN"
-  logowl "Anyway, some ROMs backport these props and support the same features" "TIPS"
-  logowl "Don't worry, you can still have a try" "TIPS"
-  fi
-}
+[ ! -d "$VERIFY_DIR" ] && mkdir -p "$VERIFY_DIR"
 
-if [ ! -d "$VERIFY_DIR" ]; then
-    mkdir -p "$VERIFY_DIR"
-fi
-
-echo "- Extract aautilities.sh"
-unzip -o "$ZIPFILE" 'aautilities.sh' -d "$TMPDIR" >&2
-if [ ! -f "$TMPDIR/aautilities.sh" ]; then
-  echo "! Failed to extract aautilities.sh!"
+echo "- Extract aa-util.sh"
+unzip -o "$ZIPFILE" 'aa-util.sh' -d "$TMPDIR" >&2
+if [ ! -f "$TMPDIR/aa-util.sh" ]; then
+  echo "! Failed to extract aa-util.sh!"
   abort "! This zip may be corrupted!"
 fi
 
-. "$TMPDIR/aautilities.sh"
+. "$TMPDIR/aa-util.sh"
 
 logowl "Setting up $MOD_NAME"
 logowl "Version: $MOD_VER"
 install_env_check
-check_android_api
 show_system_info
+logowl "Install from $ROOT_SOL app"
 logowl "Essential checks"
-extract "$ZIPFILE" 'aautilities.sh' "$VERIFY_DIR"
+
+if [ "$API" -ge 30 ]; then
+    logowl "Detect Android 11+"
+else
+    logowl "Detect Android 10-"
+    logowl "$MOD_NAME may not work properly"
+    logowl "Anyway, you can still have a try"
+fi
+
+extract "$ZIPFILE" 'aa-util.sh' "$VERIFY_DIR"
 extract "$ZIPFILE" 'customize.sh' "$VERIFY_DIR"
 logowl "Extract module files"
 extract "$ZIPFILE" 'module.prop' "$MODPATH"
 extract "$ZIPFILE" 'post-fs-data.sh' "$MODPATH"
-extract "$ZIPFILE" 'service.sh' "$MODPATH"
 extract "$ZIPFILE" 'uninstall.sh' "$MODPATH"
-rm -rf "$VERIFY_DIR"
-set_module_files_perm
-logowl "Welcome to use ${MODNAME}!"
+logowl "Set permission"
+set_permission_recursive "$MODPATH" 0 0 0755 0644
+logowl "Welcome to use ${MOD_NAME}!"
