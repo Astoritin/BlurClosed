@@ -1,7 +1,7 @@
-id=aozolighter
-name=Aozolighter
-version=v1.2.3
-versionCode=500
+id=blurclosed
+name=Blur Closed
+version=v1.1.0
+versionCode=110
 author=Astoritin Ambrosius
-updateJson=https://raw.githubusercontent.com/Astoritin/Aozolighter/main/webpage/update.json
-description=A Magisk module to disable window blur effects to boost performance and potentially extend battery life✨
+updateJson=https://raw.githubusercontent.com/Astoritin/BlurClosed/main/webpage/update.json
+description=Disable blur effects.
