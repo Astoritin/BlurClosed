@@ -39,39 +39,20 @@ extract() {
     fi
 }
 
+extract "customize.sh" "$TMPDIR" >/dev/null 2>&1
 
 [ ! -d "$VERIFY_DIR" ] && mkdir -p "$VERIFY_DIR"
 
-echo "- Extract aa-util.sh"
-unzip -o "$ZIPFILE" 'aa-util.sh' -d "$TMPDIR" >&2
-if [ ! -f "$TMPDIR/aa-util.sh" ]; then
-  echo "! Failed to extract aa-util.sh!"
-  abort "! This zip may be corrupted!"
+ui_print "- Setting up $MOD_NAME"
+ui_print "- Version: $MOD_VER"
+if [ "$API" -lt 30 ]; then
+    ui_print "- Detect Android 10-"
+    ui_print "- $MOD_NAME may not work properly"
+    ui_print "- Anyway, you can still have a try"
 fi
-
-. "$TMPDIR/aa-util.sh"
-
-logowl "Setting up $MOD_NAME"
-logowl "Version: $MOD_VER"
-install_env_check
-show_system_info
-logowl "Install from $ROOT_SOL app"
-logowl "Essential checks"
-
-if [ "$API" -ge 30 ]; then
-    logowl "Detect Android 11+"
-else
-    logowl "Detect Android 10-"
-    logowl "$MOD_NAME may not work properly"
-    logowl "Anyway, you can still have a try"
-fi
-
-extract "$ZIPFILE" 'aa-util.sh' "$VERIFY_DIR"
-extract "$ZIPFILE" 'customize.sh' "$VERIFY_DIR"
-logowl "Extract module files"
-extract "$ZIPFILE" 'module.prop' "$MODPATH"
-extract "$ZIPFILE" 'post-fs-data.sh' "$MODPATH"
-extract "$ZIPFILE" 'uninstall.sh' "$MODPATH"
-logowl "Set permission"
+extract "module.prop"
+extract "post-fs-data.sh"
+extract "uninstall.sh"
+ui_print "- Setting permissions"
 set_permission_recursive "$MODPATH" 0 0 0755 0644
-logowl "Welcome to use ${MOD_NAME}!"
+ui_print "- Welcome to ${MOD_NAME}!"
