@@ -1,10 +1,44 @@
 #!/system/bin/sh
 SKIPUNZIP=1
 
-VERIFY_DIR="$TMPDIR/.aa_verify"
+MOD_PROP="${TMPDIR}/module.prop"
+MOD_NAME="$(grep_prop name "$MOD_PROP")"
+MOD_VER="$(grep_prop version "$MOD_PROP") ($(grep_prop versionCode "$MOD_PROP"))"
 
-MOD_NAME="$(grep_prop name "${TMPDIR}/module.prop")"
-MOD_VER="$(grep_prop version "${TMPDIR}/module.prop") ($(grep_prop versionCode "${TMPDIR}/module.prop"))"
+extract() {
+    file="$1"
+    dir="${2:-$MODPATH}"
+    junk="${3:-false}"
+    opts="-o"
+
+    file_path="$dir/$file"  
+    hash_path="$TMPDIR/$file.sha256"
+
+    if [ "$junk" = true ]; then
+        opts="-oj"
+        file_path="$dir/$(basename "$file")"
+        hash_path="$TMPDIR/$(basename "$file").sha256"
+    fi
+
+    file_dir="$(dirname $file_path)"
+    mkdir -p "$file_dir" || abort "! Failed to create dir $dir!"
+
+    unzip $opts "$ZIPFILE" "$file" -d "$dir" >&2
+    [ -f "$file_path" ] || abort "! $file does NOT exist"
+
+    unzip $opts "$ZIPFILE" "${file}.sha256" -d "$TMPDIR" >&2
+    [ -f "$hash_path" ] || abort "! ${file}.sha256 does NOT exist"
+
+    expected_hash="$(cat "$hash_path")"
+    calculated_hash="$(sha256sum "$file_path" | cut -d ' ' -f1)"
+
+    if [ "$expected_hash" == "$calculated_hash" ]; then
+        ui_print "- Verified $file" >&1
+    else
+        abort "! Failed to verify $file"
+    fi
+}
+
 
 [ ! -d "$VERIFY_DIR" ] && mkdir -p "$VERIFY_DIR"
 
