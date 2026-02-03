@@ -1,6 +1,6 @@
 id=blurclosed
 name=Blur Closed
-version=v1.1.1
+version=1.1.1
 versionCode=111
 author=Astoritin
 updateJson=https://raw.githubusercontent.com/Astoritin/BlurClosed/main/webpage/update.json
