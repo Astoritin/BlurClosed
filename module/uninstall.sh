@@ -3,8 +3,4 @@ MODDIR=${0%/*}
 
 API="$(getprop ro.build.version.sdk)"
 
-if [ "$API" -ge "29" ]; then
-    cmd window disable-blur 0
-else
-    cmd wm disable-blur 0
-fi
+[ "$API" -ge "29" ] && cmd window disable-blur 0 || cmd wm disable-blur 0

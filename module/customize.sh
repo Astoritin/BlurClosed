@@ -45,11 +45,12 @@ extract "customize.sh" "$TMPDIR" >/dev/null 2>&1
 
 ui_print "- Setting up $MOD_NAME"
 ui_print "- Version: $MOD_VER"
-if [ "$API" -lt 30 ]; then
+[ "$API" -lt 30 ] && {
     ui_print "- Detect Android 10-"
     ui_print "- $MOD_NAME may not work properly"
     ui_print "- Anyway, you can still have a try"
-fi
+}
+[ "$API" -ge "29" ] && cmd window disable-blur 1 || cmd wm disable-blur 1
 extract "module.prop"
 extract "post-fs-data.sh"
 extract "uninstall.sh"
